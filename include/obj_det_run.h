@@ -40,6 +40,16 @@ extern const uint32_t array_depth;
 //
 //} crop_info;
 
+typedef struct label_stats {
+
+    label_stats() = default;
+
+    label_stats(uint32_t c, uint32_t mc) : count(c), match_count(mc) {}
+
+    uint32_t count;
+    uint32_t match_count;
+
+} label_stats;
 
 // ----------------------------------------------------------------------------------------
 void parse_input_file(std::string parse_filename, 
