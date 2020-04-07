@@ -417,9 +417,10 @@ int main(int argc, char** argv)
             //overlay the dnn detections on the image
             for (jdx = 0; jdx < dnn_labels.size(); ++jdx)
             {
-                auto& class_index = std::find(class_names.begin(), class_names.end(), dnn_labels[jdx].label);
+                auto class_index = std::find(class_names.begin(), class_names.end(), dnn_labels[jdx].label);
+                
                 overlay_bounding_box(rgb_img, dnn_labels[jdx], class_color[std::distance(class_names.begin(), class_index)], false);
-                auto center = dlib::center(dnn_labels[jdx].rect);
+                dlib::point center = dlib::center(dnn_labels[jdx].rect);
 
                 std::cout << "Detection: " << dnn_labels[jdx].label << ", Center (x, y): " << center.x() << "," << center.y();
                 std::cout << ", Confidence Level: " << dnn_labels[jdx].detection_confidence << std::endl;
