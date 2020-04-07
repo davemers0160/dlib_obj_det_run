@@ -29,8 +29,7 @@
 #include "yj_net_v10.h"
 #include "load_data.h"
 #include "load_oid_data.h"
-#include "eval_net_performance.h"
-
+//#include "eval_net_performance.h"
 
 // dlib includes
 #include <dlib/dnn.h>
