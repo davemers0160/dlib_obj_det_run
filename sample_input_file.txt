@@ -7,13 +7,13 @@ yj_v10_
 0
 
 #2 network: this tells the code which trained network file to load
-#D:/Projects/dlib_obj_det_run/nets/yj_v10_HPC_final_net.dat
-~/Projects/dlib_obj_det_run/nets/yj_v10_HPC_final_net.dat
+D:/Projects/dlib_obj_det_run/nets/yj_v10_HPC_final_net.dat
+#~/Projects/dlib_obj_det_run/nets/yj_v10_HPC_final_net.dat
 
 #3 test data file: this is the file that contains the list of associated test data, text file format
 # text file format: 0 -> grouped boxes (default), 1 -> open images bounding box format
-#D:/Projects/object_detection_data/test_plane/plane_test1_input.txt, 0
-~/Projects/object_detection_data/test_plane/plane_test1_input.txt, 0
+D:/Projects/object_detection_data/test_plane/plane_test1_input.txt, 0
+#~/Projects/object_detection_data/test_plane/plane_test1_input.txt, 0
 
 #4 root location where the results will be saved -> must have the following folders: nets, results, result_images
 ../results/

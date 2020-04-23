@@ -26,7 +26,6 @@ endif()
 message("Platform: " ${PLATFORM})
 
 option(USE_AVX_INSTRUCTIONS  "Compile your program with AVX instructions"  ON)
-#set(USE_AVX_INSTRUCTIONS  ON)
 
 if(WIN32)
     if(${PLATFORM} STREQUAL "Laptop")
