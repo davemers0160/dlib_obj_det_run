@@ -24,9 +24,19 @@
 #include "get_current_time.h"
 #include "num2string.h"
 #include "file_ops.h"
+#include "sleep_ms.h"
 
 // Net Version
-#include "yj_net_v10.h"
+#if defined(USE_OBJ_LIB)
+#include "obj_det_lib.h"
+extern const uint32_t array_depth = 1;
+
+#else
+extern const uint32_t array_depth;
+#include "obj_det_net_v10.h"
+
+#endif()
+
 #include "load_data.h"
 #include "load_oid_data.h"
 //#include "eval_net_performance.h"
@@ -51,7 +61,7 @@
 
 // -------------------------------GLOBALS--------------------------------------
 
-extern const uint32_t array_depth;
+//extern const uint32_t array_depth;
 std::string platform;
 
 //this will store the standard RGB images and groundtruth data for the bounding box labels
@@ -310,13 +320,67 @@ int main(int argc, char** argv)
         dlib::set_dnn_prefer_fastest_algorithms();
 
         // set the cuda device explicitly
-        if (gpu.size() == 1)
-            dlib::cuda::set_device(gpu[0]);
-       
+        //if (gpu.size() == 1)
+        //    dlib::cuda::set_device(gpu[0]);
+     
 //-----------------------------------------------------------------------------
 //  EVALUATE THE NETWORK PERFORMANCE
 //-----------------------------------------------------------------------------
 
+#if defined(USE_OBJ_LIB)
+        unsigned int num_classes, num_win;
+        unsigned int num_dets = 0;
+        unsigned int t_nr = 0, t_nc = 0;
+
+        window_struct* det_win;
+        struct detection_center* detects;
+        struct detection_struct* dets;
+
+        // init the network
+        init_net(trained_net_file.c_str(), &num_classes, det_win, &num_win);
+
+        unsigned char* tiled_img = NULL;
+        unsigned char* det_img = NULL;
+
+        long nr = 0, nc = 0;
+        uint32_t index = 0;
+
+        for (idx = 0; idx < test_images.size(); ++idx)
+        {
+            nr = test_images[idx][0].nr();
+            nc = test_images[idx][0].nc();
+
+            unsigned char *te = new unsigned char[nr * nc];
+            index = 0;
+            for (long r = 0; r < nr; ++r)
+            {
+                for (long c = 0; c < nc; ++c)
+                {
+                    te[index++] = test_images[idx][0](r, c);
+                }
+            }
+
+            // get the rough classification time per image
+            start_time = chrono::system_clock::now();
+            get_detections(te, nr, nc, &num_dets, detects);
+            run_net(te, nr, nc, det_img, &num_dets, dets);
+
+            stop_time = chrono::system_clock::now();
+            elapsed_time = chrono::duration_cast<d_sec>(stop_time - start_time);
+            sleep_ms(100);
+
+            std::cout << "------------------------------------------------------------------" << std::endl;
+            std::cout << "Image " << std::right << std::setw(5) << std::setfill('0') << idx << ": " << te_image_files[idx] << std::endl;
+            std::cout << "Image Size (h x w): " << test_images[idx][0].nr() << "x" << test_images[idx][0].nc() << std::endl;
+            std::cout << "Classification Time (s): " << elapsed_time.count() << std::endl;
+
+            for (jdx = 0; jdx < num_dets; ++jdx)
+            {
+                std::cout << "Detection: " << detects[jdx].name << ", Center (x, y): " << detects[jdx].x << "," << detects[jdx].y << std::endl;
+            }
+
+        }
+#else
         // load the network from the saved file
         anet_type test_net;
 
@@ -486,6 +550,8 @@ int main(int argc, char** argv)
             data_log_stream << std::left << std::setw(15) << std::setfill(' ') << (class_names[jdx] + ":") << std::fixed << std::setprecision(4) << acc << ", " << test_label_stats[jdx].match_count << ", " << test_label_stats[jdx].count << std::endl;
         }
         data_log_stream << "------------------------------------------------------------------" << std::endl;
+
+#endif
 
         std::cout << "End of Program." << std::endl;
         data_log_stream.close();

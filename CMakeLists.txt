@@ -25,7 +25,8 @@ endif()
 
 message("Platform: " ${PLATFORM})
 
-option(USE_AVX_INSTRUCTIONS  "Compile your program with AVX instructions"  ON)
+option(USE_AVX_INSTRUCTIONS  "Compile the program with AVX instructions"  ON)
+option(WITH_OBJ_LIB  "Compile the program using the object detection library"  ON)
 
 if(WIN32)
     if(${PLATFORM} STREQUAL "Laptop")
@@ -61,9 +62,22 @@ else()
     endif()
 endif()
 
+if(WITH_OBJ_LIB)
+
+    if(WIN32)
+        set(OBJ_DET_DIRS "D:/Projects/obj_det_lib/include")
+        set(OBJ_DET_LIBS "D:/Projects/obj_det_lib/build/Release/obj_det.lib")     
+    else()
+        set(OBJ_DET_DIRS "~/Projects/obj_det_lib/include")
+        set(OBJ_DET_LIBS "~/Projects/obj_det_lib/build/libobj_det.so")
+    endif()
+
+    add_definitions(-DUSE_OBJ_LIB)
+    add_definitions(-DBUILD_LIB)
+
+endif()
 
 set(exe_name "obj_det")
-
 
 # grab all of the *.cpp files in the src directory
 file(GLOB SOURCES "src/*.cpp" 
@@ -74,6 +88,7 @@ file(GLOB SOURCES "src/*.cpp"
 set(project_includes "include" 
     "${COMMON_ROOT}/include" 
     "${DLIB_CONTRIB}/include" 
+    "${OBJ_DET_DIRS}"
     )
 
 # find OpenCV
@@ -108,7 +123,7 @@ message(" ")
 
 include_directories(${project_includes})
 add_executable(${exe_name} ${SOURCES})
-target_link_libraries(${exe_name} dlib::dlib ${OpenCV_LIBS})
+target_link_libraries(${exe_name} dlib::dlib ${OpenCV_LIBS} ${OBJ_DET_LIBS})
 
 if(WIN32)
     message("MSVC Version: " ${MSVC_VERSION})
